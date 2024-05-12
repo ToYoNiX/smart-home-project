@@ -1,3 +1,54 @@
+// Flame sensor
+class FlameSensor {
+private:
+  uint8_t pin;
+public:
+  FlameSensor (uint8_t p) {
+    pin = p;
+    pinMode(pin, INPUT);
+  }
+
+  bool isFire () {
+    int sensorReading = analogRead(pin);
+    // MIN = 0, MAX = 1024
+      int range = map(sensorReading, 0, 1024, 0, 3);
+
+    if (range) {
+      return true;
+    }
+
+    return false;
+  }
+}; 
+
+/**********************************************************************************************************/
+// Gas Sensor
+class GasSensor {
+private:
+  short analogPin, digitalPin;
+  int sensorValue;
+  int digitalValue;
+public:
+  GasSensor (short ap, short dp) {
+    analogPin = ap;
+    digitalPin = dp;
+    pinMode(analogPin, INPUT);
+    pinMode(digitalPin, INPUT);
+  }
+
+  bool isPolluted () {
+    sensorValue = analogRead(analogPin); // read analog input pin 0
+    digitalValue = digitalRead(digitalPin);
+
+    if (sensorValue > 400) {
+      return true;
+    }
+
+    return false;
+  } 
+};
+
+/**********************************************************************************************************/
 // Temp and Humidity
 #include <dht.h>
 
