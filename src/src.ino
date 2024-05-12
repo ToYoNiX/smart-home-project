@@ -1,3 +1,46 @@
+// Water sensor
+class WaterSensor {
+private:
+  short power_pin;
+  uint8_t signal_pin;
+
+  int threshold, value = 0, level = 0;
+public:
+  WaterSensor (short p, uint8_t s, int t) {
+    power_pin = p;
+    signal_pin = s;
+    threshold = t;
+
+    pinMode(power_pin, OUTPUT);
+    digitalWrite(power_pin, LOW); // turn the sensor OFF
+  }
+
+  bool isWaterLeakage () {
+    digitalWrite(power_pin, HIGH);  // turn the sensor ON
+    delay(10);                      // wait 10 milliseconds
+    value = analogRead(signal_pin); // read the analog value from sensor
+    digitalWrite(power_pin, LOW);   // turn the sensor OFF
+
+    if (value > threshold)
+      return true;
+
+    return false;
+  }
+
+  int waterLevel () {
+    digitalWrite(power_pin, HIGH);  // turn the sensor ON
+    delay(10);                      // wait 10 milliseconds
+    value = analogRead(signal_pin); // read the analog value from sensor
+    digitalWrite(power_pin, LOW);   // turn the sensor OFF
+
+    // SENSOR_MIN = 0, SENSOR_MAX = 521
+    level = map(value, 0, 521, 0, 4); // 4 levels
+
+    return level;
+  }
+};
+
+/**********************************************************************************************************/
 // RFID Module
 #include <Wire.h>
 #include <PN532.h>
@@ -11,6 +54,11 @@ String tagId = "None";
 byte nuidPICC[4];
 
 bool isNFC() {
+  delay(300);
+  if (!nfc.tagPresent()) {
+    return false;  
+  }
+  
   short total = 0;
   for (short i = 0; i < 5; i++) {
     if (nfc.tagPresent()) {
