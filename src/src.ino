@@ -1,3 +1,22 @@
+// LightSensor
+class LightSensor {
+private:
+  short pin;
+public:
+  LightSensor (short p) {
+    pin = p;
+    pinMode(pin, INPUT);
+  }
+
+  bool isDark () {
+    if(digitalRead(pin) == LOW)
+      return true;
+
+    return false;
+  }
+};
+
+/**********************************************************************************************************/
 // Water sensor
 class WaterSensor {
 private:
