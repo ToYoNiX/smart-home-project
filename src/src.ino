@@ -1,4 +1,29 @@
-// LightSensor
+// Temp and Humidity
+#include <dht.h>
+
+class TempAndHumidity {
+private:
+  short pin;
+  dht DHT;
+public:
+  TempAndHumidity (short p) {
+    pin = p;
+    pinMode(pin, INPUT);
+  }
+
+  float humidity () {
+    int readData = DHT.read11(pin);
+    return DHT.humidity;
+  }
+
+  float temperature () {
+    int readData = DHT.read11(pin);
+    return DHT.temperature;
+  }
+};
+
+/**********************************************************************************************************/
+// Light Sensor
 class LightSensor {
 private:
   short pin;
