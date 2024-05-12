@@ -11,9 +11,6 @@ String tagId = "None";
 byte nuidPICC[4];
 
 bool isNFC() {
-  if (!nfc.tagPresent())
-    return false;
-
   short total = 0;
   for (short i = 0; i < 5; i++) {
     if (nfc.tagPresent()) {
@@ -133,12 +130,14 @@ String password = "1234";
 bool isPass () {
   while (numberOfTries) {
     String input = "";
-  
+ 
     while (true) {
       char keyPress = controlPad.getKey();
 
-      if (!keyPress && input.length() == 0)
+      if (keyPress == '*') {
+        buzzer_1.normal();
         return false;
+      }
       
       if (keyPress != '#') {
         if (keyPress) {
@@ -177,10 +176,10 @@ void setup() {
   nfc.begin();
 
   while (true) {
-    if (isNFC() || isPass()) {
+    if (isPass() || isNFC()) {
       buzzer_1.siren();
-      break;  
-    } 
+      break;
+    }
   }
 }
 
