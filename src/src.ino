@@ -10,14 +10,26 @@ NfcAdapter nfc = NfcAdapter(pn532_i2c);
 String tagId = "None";
 byte nuidPICC[4];
 
-void readNFC() 
-{
- if (nfc.tagPresent()) {
-   NfcTag tag = nfc.read();
-   tag.print();
-   tagId = tag.getUidString();
- }
- delay(5000);
+bool isNFC() {
+  if (!nfc.tagPresent())
+    return false;
+
+  short total = 0;
+  for (short i = 0; i < 5; i++) {
+    if (nfc.tagPresent()) {
+     NfcTag tag = nfc.read();
+     tag.print();
+     tagId = tag.getUidString();
+    }
+
+    delay (100);
+    
+    if (tagId == "D3 61 6A 0B") {
+     total++; 
+    }
+  }
+
+  return (total > 4 ? 1 : 0);
 }
 
 /**********************************************************************************************************/
@@ -112,31 +124,25 @@ class Ultrasonic {
 };
 
 /**********************************************************************************************************/
-
 buzzer buzzer_1(4);
 
 /**********************************************************************************************************/
-void setup() {
-  Serial.begin(115200);
-  Serial.println("System initialized");
-  nfc.begin();
-
-  while (true) {
-    readNFC();
-  }
-  
-  // Check password
-  String password = "1234";
-  short numberOfTries = 3;
+// Password
+short numberOfTries = 3;
+String password = "1234";
+bool isPass () {
   while (numberOfTries) {
     String input = "";
   
     while (true) {
       char keyPress = controlPad.getKey();
+
+      if (!keyPress && input.length() == 0)
+        return false;
       
       if (keyPress != '#') {
         if (keyPress) {
-          buzzer_1.normal(); 
+          buzzer_1.normal();
         } 
  
         input += String(keyPress);
@@ -147,20 +153,33 @@ void setup() {
       break;
     }
     
+    if (input == password) {
+      return true;
+    }
+  
     if (input != password) {
       numberOfTries--;
       buzzer_1.notNormal();
     }
+  }
 
-    if (numberOfTries == 0) {
-      while (true) {
-        buzzer_1.siren();
-      }  
-    }
+  while (true) {
+    buzzer_1.siren();  
+  }
 
-    if (input == password) {
+  return false;
+}
+
+/**********************************************************************************************************/
+void setup() {
+  Serial.begin(115200);
+  Serial.println("System initialized");
+  nfc.begin();
+
+  while (true) {
+    if (isNFC() || isPass()) {
       buzzer_1.siren();
-      break;
+      break;  
     } 
   }
 }
