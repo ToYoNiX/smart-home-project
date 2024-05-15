@@ -1,3 +1,34 @@
+#include <Servo.h>
+class _Servo {
+private:
+  Servo sv;
+
+  short pin;
+  int pos = 0;
+public:
+  _Servo (short p) {
+    pin = p;
+    sv.attach(pin);
+  }
+
+  void opened (int p) {
+    for (pos = 0; pos <= p; pos++) {  
+      // in steps of 1 degree
+      sv.write(pos);              
+      delay(15);
+    }
+  }
+
+  void closed () {
+    for (pos = pos; pos >= 0; pos--) {  
+      // in steps of 1 degree
+      sv.write(pos);         
+      delay(15);
+    }
+  }
+};
+
+/**********************************************************************************************************/
 // Flame sensor
 class FlameSensor {
 private:
@@ -29,7 +60,7 @@ private:
   int sensorValue;
   int digitalValue;
 public:
-  GasSensor (short ap, short dp) {
+  GasSensor (uint8_t ap, short dp) {
     analogPin = ap;
     digitalPin = dp;
     pinMode(analogPin, INPUT);
@@ -186,8 +217,8 @@ char hexaKeys[ROWS][COLS] = {
   {'*', '0', '#', 'D'}
 };
 
-byte rowPins[ROWS] = {12, 11, 10, 9}; 
-byte colPins[COLS] = {8, 7, 6, 5}; 
+byte rowPins[ROWS] = {52, 50, 48, 46}; 
+byte colPins[COLS] = {44, 42, 40, 38}; 
 
 Keypad controlPad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 
@@ -264,7 +295,14 @@ class Ultrasonic {
 };
 
 /**********************************************************************************************************/
-buzzer buzzer_1(4);
+buzzer buzzer1(30);
+TempAndHumidity th1(32);
+FlameSensor fs1(A12);
+Ultrasonic us1(9, 8), us2(11, 10);
+GasSensor gs1(A14, 24);
+#define FAN_PIN 26;
+_Servo garage(6);
+#define GARAGE_LED 28;
 
 /**********************************************************************************************************/
 // Password
@@ -278,13 +316,13 @@ bool isPass () {
       char keyPress = controlPad.getKey();
 
       if (keyPress == '*') {
-        buzzer_1.normal();
+        buzzer1.normal();
         return false;
       }
       
       if (keyPress != '#') {
         if (keyPress) {
-          buzzer_1.normal();
+          buzzer1.normal();
         } 
  
         input += String(keyPress);
@@ -301,12 +339,12 @@ bool isPass () {
   
     if (input != password) {
       numberOfTries--;
-      buzzer_1.notNormal();
+      buzzer1.notNormal();
     }
   }
 
   while (true) {
-    buzzer_1.siren();  
+    buzzer1.siren();  
   }
 
   return false;
@@ -316,15 +354,8 @@ bool isPass () {
 void setup() {
   Serial.begin(115200);
   Serial.println("System initialized");
-  nfc.begin();
-
-  while (true) {
-    if (isPass() || isNFC()) {
-      buzzer_1.siren();
-      break;
-    }
-  }
 }
 
 void loop() {
+  Serial.println(th1.humidity());
 }
