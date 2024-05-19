@@ -284,7 +284,7 @@ class Ultrasonic {
 buzzer buzzer1(41);
 TempAndHumidity th1(32);
 FlameSensor fs1(A15);
-Ultrasonic us1(26, 24), us2(53, 51);
+Ultrasonic us1(26, 24), us2(53, 51),us3(39,31);
 GasSensor gs1(A14, 22);
 WaterSensor wt(7, A13 ,400);
 LightSensor lt(30);
@@ -353,7 +353,6 @@ void setup() {
   gate.attach(4); 
   garage.attach(9);
   servo_move(gate,0);
-
   servo_move(door_l,0);
   servo_move(door_r,90);
   servo_move(garage,360);
@@ -433,6 +432,7 @@ void loop() {
   Serial.println("Gas:" + String(gs1.isPolluted()));
   Serial.println("ultra1:" + String(us1.distance()));
   Serial.println("ultra2:" + String(us2.distance()));
+  Serial.println("ultra3:" + String(us3.distance()));
   Serial.println("water:" + String(wt.isWaterLeakage()));
   Serial.println("light:" + String(lt.isDark ())); 
   lcd.init();
@@ -471,15 +471,24 @@ void loop() {
 
   if(us1.distance() <= 8) {
     digitalWrite(43, HIGH);
-    Serial.println("Room light is on.");
-  }
-  else {
-    digitalWrite(43, LOW);
-  }
+    Serial.println("Room light is on.");}
+     else {digitalWrite(43, LOW);}
 
-  if(wt.isWaterLeakage()) {
-    digitalWrite(47, HIGH);
-    Serial.println("Garage light is on.");
-    delay(5000);
-  } 
+  
+
+  if(us3.distance()<=10) {buzzer1.siren();
+                          digitalWrite(47, HIGH);
+                          Serial.println("Garage light is on.");
+                            if(us3.distance()<=3){while(true){buzzer1.siren();
+                                                              buzzer1.siren();
+                                                              delay(50);
+                                                              break;}}}
+      else{digitalWrite(47,LOW);}  
+    
+  
+ if(wt.isWaterLeakage()) {digitalWrite(49,HIGH);}
+           else{digitalWrite(49,LOW);}                   
+   
+  
+    
 }
